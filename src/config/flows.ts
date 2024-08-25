@@ -1,5 +1,28 @@
-// src/config/flows.js
-const flows = {
+// src/config/flows.ts
+
+interface EmailAction {
+    type: 'sendEmail';
+    email: {
+        subject: string;
+        body: string;
+        to: string;
+    };
+}
+
+interface TimerAction {
+    type: 'timer';
+    delay: string;
+}
+
+type Action = EmailAction | TimerAction;
+
+interface Flow {
+    id: string;
+    trigger: { eventName: string };
+    actions: Action[];
+}
+
+const flows: { flows: Flow[] } = {
     "flows": [
         {
             "id": "flow1",
@@ -9,7 +32,7 @@ const flows = {
             "actions": [
                 {
                     "type": "timer",
-                    "delay": "2h"  // Wait for 2 hours
+                    "delay": "2h"
                 },
                 {
                     "type": "sendEmail",
@@ -48,4 +71,4 @@ const flows = {
     ]
 };
 
-module.exports = flows;
+export default flows;
