@@ -53,7 +53,7 @@ describe('Flow Service', () => {
     });
 
     it('should handle email sending failure', async () => {
-        (sendEmail as jest.Mock).mockResolvedValueOnce(false); // Simulate failure
+        (sendEmail as jest.MockedFunction<typeof sendEmail>).mockResolvedValueOnce(false); // Simulate failure
 
         const event = { eventName: 'websiteSignup', userEmail: 'test@example.com' };
 
