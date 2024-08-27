@@ -1,73 +1,68 @@
-import { triggerFlow, sendEmail as actualSendEmail, wait as actualWait } from '../services/flowService';
-import flows from '../config/flows';
-
-// Mock the sendEmail and wait functions to avoid actual delays and simulate email sending
-jest.mock('../services/flowService', () => ({
-    ...jest.requireActual('../services/flowService'),
-    sendEmail: jest.fn(async (email) => true),
-    wait: jest.fn(async () => Promise.resolve()),
-}));
+import * as flowService from '../services/flowService';
+import { triggerFlow } from '../services/flowService';
 
 describe('Flow Service', () => {
-    it('should trigger flow1 and send a welcome email after a delay', async () => {
-        const mockedSendEmail = actualSendEmail as jest.MockedFunction<typeof actualSendEmail>;
+    let mockedSendEmail: jest.SpyInstance;
+    let mockedWait: jest.SpyInstance;
 
+    beforeEach(() => {
+        // Mock the sendEmail and wait functions for each test case
+        mockedSendEmail = jest.spyOn(flowService, 'sendEmail').mockImplementation(jest.fn());
+        mockedWait = jest.spyOn(flowService, 'wait').mockImplementation(jest.fn());
+
+        // Clear mock calls between tests
+        jest.clearAllMocks();
+    });
+
+    afterEach(() => {
+        // Restore the original implementations after each test
+        jest.restoreAllMocks();
+    });
+
+    it('should trigger flow1 and execute actions correctly for websiteSignup event', async () => {
         const event = { eventName: 'websiteSignup', userEmail: 'test@example.com' };
 
         await triggerFlow(event.eventName, event.userEmail);
 
-        const flow = flows.flows.find(flow => flow.id === 'flow1');
-        expect(flow).toBeDefined();
+        // Validate that the wait function was called correctly
+        expect(mockedWait).toHaveBeenCalledTimes(1);
+        expect(mockedWait).toHaveBeenCalledWith('2h');
 
-        const actions = flow?.actions || [];
-        expect(actions.length).toBe(2);
-
-        expect(actions[0].type).toBe('timer');
-        expect(actions[0].delay).toBe('2h');
-        expect(actions[1].type).toBe('sendEmail');
-        expect(actions[1].email.subject).toBe('Welcome to Sock World!');
+        // Validate that the sendEmail function was called correctly
+        expect(mockedSendEmail).toHaveBeenCalledTimes(1);
+        expect(mockedSendEmail).toHaveBeenCalledWith({
+            subject: 'Welcome to Sock World!',
+            body: 'Thank you for signing up to our website. We hope you love our socks!',
+            to: 'test@example.com',
+        });
     });
 
-    it('should not trigger any flow if the event name is unknown', async () => {
-        const event = { eventName: 'unknownEvent', userEmail: 'test@example.com' };
+    it('should trigger flow2 and execute actions correctly for socksPurchased event', async () => {
+        const event = { eventName: 'socksPurchased', userEmail: 'buyer@example.com' };
 
         await triggerFlow(event.eventName, event.userEmail);
 
-        // Assuming no flows should be triggered
-        expect(actualSendEmail).not.toHaveBeenCalled();
-        expect(actualWait).not.toHaveBeenCalled();
+        // Validate that sendEmail was called twice with correct details
+        expect(mockedSendEmail).toHaveBeenCalledTimes(2);
+        expect(mockedSendEmail).toHaveBeenNthCalledWith(1, {
+            subject: 'Payment Received',
+            body: 'Thank you for your purchase! We have received your payment.',
+            to: 'buyer@example.com',
+        });
+        expect(mockedSendEmail).toHaveBeenNthCalledWith(2, {
+            subject: 'Socks Dispatched',
+            body: 'Good news! Your socks have been dispatched and are on their way.',
+            to: 'buyer@example.com',
+        });
     });
 
-    it('should trigger multiple actions correctly', async () => {
-        const event = { eventName: 'multipleActionsEvent', userEmail: 'test@example.com' };
+    it('should not trigger any flow for an unknown event', async () => {
+        const event = { eventName: 'unknownEvent', userEmail: 'unknown@example.com' };
 
         await triggerFlow(event.eventName, event.userEmail);
 
-        // Check if the flow exists
-        const flow = flows.flows.find(flow => flow.id === 'flow2');
-        expect(flow).toBeDefined();
-
-        const actions = flow?.actions || [];
-        expect(actions.length).toBe(3);
-
-        // Validate each action type and its properties
-        expect(actions[0].type).toBe('sendEmail');
-        expect(actions[1].type).toBe('timer');
-        expect(actions[2].type).toBe('sendEmail');
-    });
-
-    it('should handle flow with wait time', async () => {
-        const event = { eventName: 'waitEvent', userEmail: 'test@example.com' };
-
-        await triggerFlow(event.eventName, event.userEmail);
-
-        const flow = flows.flows.find(flow => flow.id === 'flowWithWait');
-        expect(flow).toBeDefined();
-
-        const actions = flow?.actions || [];
-        expect(actions.length).toBe(2);
-
-        expect(actions[0].type).toBe('wait');
-        expect(actions[1].type).toBe('sendEmail');
+        // Validate that neither wait nor sendEmail were called
+        expect(mockedWait).not.toHaveBeenCalled();
+        expect(mockedSendEmail).not.toHaveBeenCalled();
     });
 });
