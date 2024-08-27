@@ -1,24 +1,24 @@
 {
     "compilerOptions": {
-        "target": "ESNext", // Use latest ECMAScript features
-        "module": "commonjs", // Use CommonJS module system
-        "outDir": "./dist", // Output directory for compiled files
-        "rootDir": "./src", // Root directory of source files
-        "strict": true, // Enable strict type-checking options
-        "esModuleInterop": true, // Enable interoperability between CommonJS and ES Modules
-        "moduleResolution": "node", // Resolve modules like Node.js
-        "allowSyntheticDefaultImports": true, // Allow default imports from modules with no default export
-        "skipLibCheck": true, // Skip type checking of declaration files
-        "forceConsistentCasingInFileNames": true // Ensure consistent casing in file names
+        "target": "ESNext",
+        "module": "commonjs",
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "strict": true,
+        "esModuleInterop": true,
+        "moduleResolution": "node",
+        "allowSyntheticDefaultImports": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true
     },
     "include": [
-        "src/**/*", // Include all TypeScript files in the src directory
-        "index.ts" // Include index.ts file at the root
+        "src/**/*",
+        "index.ts"
     ],
     "exclude": [
-        "node_modules", // Exclude node_modules directory
-        "**/*.test.ts", // Optionally exclude test files if you don't want them in the output
-        "**/*.spec.ts", // Optionally exclude spec files if you don't want them in the output
-        "dist" // Exclude dist directory
+        "node_modules",
+        "**/*.test.ts",
+        "**/*.spec.ts",
+        "dist"
     ]
 }
