@@ -1,4 +1,3 @@
-// src/routes/flowRoutes.ts
 import express from 'express';
 import { triggerFlow } from '../services/flowService';
 
